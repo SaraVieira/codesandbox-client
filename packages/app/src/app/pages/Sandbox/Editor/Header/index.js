@@ -51,8 +51,7 @@ const Header = ({ store, signals }) => {
             })
           }
         />
-
-        {store.user.curatorAt ? (
+        {store.user && store.user.curatorAt ? (
           <Action
             title="Pick"
             Icon={() => (
