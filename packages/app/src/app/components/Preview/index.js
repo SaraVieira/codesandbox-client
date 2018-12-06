@@ -436,6 +436,11 @@ class BasePreview extends React.Component<Props, State> {
     if (this.serverPreview) {
       this.initializeLastSent();
       this.setupSSESockets();
+
+      setTimeout(() => {
+        // Remove screenshot after specific time, so the loading container spinner can still show
+        this.setState({ showScreenshot: false });
+      }, 800);
     }
 
     this.setState(
@@ -468,11 +473,14 @@ class BasePreview extends React.Component<Props, State> {
           this.disposeInitializer = this.props.onInitialized(this);
         }
 
-        setTimeout(() => {
-          // We show a screenshot of the sandbox (if available) on top of the preview if the frame
-          // hasn't loaded yet
-          this.setState({ showScreenshot: false });
-        }, this.serverPreview ? 0 : 600);
+        setTimeout(
+          () => {
+            // We show a screenshot of the sandbox (if available) on top of the preview if the frame
+            // hasn't loaded yet
+            this.setState({ showScreenshot: false });
+          },
+          this.serverPreview ? 0 : 600
+        );
 
         this.executeCodeImmediately(true);
       } else {
@@ -773,7 +781,7 @@ class BasePreview extends React.Component<Props, State> {
         {overlayMessage && <Loading>{overlayMessage}</Loading>}
 
         <Spring
-          from={{ opacity: 1 }}
+          from={{ opacity: 0 }}
           to={{
             opacity: this.state.showScreenshot ? 0 : 1,
           }}
@@ -792,6 +800,8 @@ class BasePreview extends React.Component<Props, State> {
                 hideNavigation={!showNavigation}
                 style={{
                   ...style,
+                  zIndex: 1,
+                  backgroundColor: 'white',
                   pointerEvents:
                     dragging || inactive || this.props.isResizing
                       ? 'none'
@@ -799,39 +809,37 @@ class BasePreview extends React.Component<Props, State> {
                 }}
               />
 
-              {this.props.sandbox.screenshotUrl &&
-                style.opacity !== 1 && (
+              {this.props.sandbox.screenshotUrl && style.opacity !== 1 && (
+                <div
+                  style={{
+                    overflow: 'hidden',
+                    width: '100%',
+                    position: 'absolute',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    top: 40,
+                    zIndex: 0,
+                  }}
+                >
                   <div
+                    alt={this.props.sandbox.title}
                     style={{
-                      overflow: 'hidden',
                       width: '100%',
-                      position: 'absolute',
-                      display: 'flex',
-                      justifyContent: 'center',
-                      left: 0,
-                      right: 0,
-                      bottom: 0,
-                      top: 40,
-                      opacity: 1 - style.opacity,
+                      height: '100%',
+                      filter: `blur(2px)`,
+                      transform: 'scale(1.025, 1.025)',
+                      backgroundImage: `url("${
+                        this.props.sandbox.screenshotUrl
+                      }")`,
+                      backgroundRepeat: 'no-repeat',
+                      backgroundPositionX: 'center',
                     }}
-                  >
-                    <div
-                      alt={this.props.sandbox.title}
-                      style={{
-                        width: '100%',
-                        height: '100%',
-                        filter: `blur(2px)`,
-                        transform: 'scale(1.025, 1.025)',
-                        backgroundImage: `url("${
-                          this.props.sandbox.screenshotUrl
-                        }")`,
-                        backgroundRepeat: 'no-repeat',
-                        backgroundPositionX: 'center',
-                        backgroundSize: 'cover',
-                      }}
-                    />
-                  </div>
-                )}
+                  />
+                </div>
+              )}
             </React.Fragment>
           )}
         </Spring>
