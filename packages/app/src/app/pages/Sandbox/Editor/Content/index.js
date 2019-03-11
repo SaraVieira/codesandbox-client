@@ -5,8 +5,8 @@ import { Prompt } from 'react-router-dom';
 import { reaction } from 'mobx';
 import { TextOperation } from 'ot';
 import { inject, observer } from 'mobx-react';
-import getTemplateDefinition from 'common/templates';
-import type { ModuleError } from 'common/types';
+import getTemplateDefinition from 'common/lib/templates';
+import type { ModuleError } from 'common/lib/types';
 
 import CodeEditor from 'app/components/CodeEditor';
 import type { Editor, Settings } from 'app/components/CodeEditor/types';
@@ -386,8 +386,13 @@ class EditorPreview extends React.Component<Props, State> {
     const template = getTemplateDefinition(sandbox.template);
 
     const isReadOnly = () => {
-      if (store.live.isCurrentEditor) {
-        return false;
+      if (store.live.isLive) {
+        if (
+          !store.live.isCurrentEditor ||
+          (store.live.roomInfo && store.live.roomInfo.ownerIds.length === 0)
+        ) {
+          return true;
+        }
       }
 
       if (template.isServer) {
@@ -396,7 +401,7 @@ class EditorPreview extends React.Component<Props, State> {
         }
       }
 
-      return store.live.isLive;
+      return false;
     };
 
     return (
@@ -478,6 +483,7 @@ class EditorPreview extends React.Component<Props, State> {
               isLive={store.live.isLive}
               onCodeReceived={signals.live.onCodeReceived}
               onSelectionChanged={signals.live.onSelectionChanged}
+              onModuleStateMismatch={signals.live.onModuleStateMismatch}
               onNpmDependencyAdded={name => {
                 if (sandbox.owned) {
                   signals.editor.addNpmDependency({ name, isDev: true });

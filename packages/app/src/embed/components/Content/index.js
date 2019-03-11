@@ -1,6 +1,6 @@
 // @flow
 import * as React from 'react';
-import type { Sandbox, Module, ModuleError } from 'common/types';
+import type { Sandbox, Module, ModuleError } from 'common/lib/types';
 import BasePreview from 'app/components/Preview';
 import CodeEditor from 'app/components/CodeEditor';
 import type { Editor, Settings } from 'app/components/CodeEditor/types';
@@ -8,7 +8,7 @@ import Tab from 'app/pages/Sandbox/Editor/Content/Tabs/Tab';
 import EntryIcons from 'app/pages/Sandbox/Editor/Workspace/Files/DirectoryEntry/Entry/EntryIcons';
 import getType from 'app/utils/get-type';
 
-import getTemplate from 'common/templates';
+import getTemplate from 'common/lib/templates';
 
 import { StyledNotSyncedIcon } from 'app/pages/Sandbox/Editor/Content/Tabs/ModuleTab/elements';
 import {
@@ -19,8 +19,8 @@ import {
 
 import DevTools from 'app/components/Preview/DevTools';
 
-import { resolveModule, findMainModule } from 'common/sandbox/modules';
-import RunOnClick from 'common/components/RunOnClick';
+import { resolveModule, findMainModule } from 'common/lib/sandbox/modules';
+import RunOnClick from 'common/lib/components/RunOnClick';
 
 import { Container, Tabs, Split } from './elements';
 
@@ -54,6 +54,7 @@ type Props = {
   expandDevTools: boolean,
   runOnClick: boolean,
   verticalMode: boolean,
+  tabs?: Array<string>,
 };
 
 type State = {
@@ -67,8 +68,20 @@ export default class Content extends React.PureComponent<Props, State> {
   constructor(props: Props) {
     super(props);
 
-    let tabs = [];
+    const tabs = this.getInitTabs(props);
 
+    this.state = {
+      running: !props.runOnClick,
+      tabs,
+      dragging: false,
+      isInProjectView: props.isInProjectView,
+    };
+
+    this.errors = [];
+  }
+
+  getInitTabs = (props: Props) => {
+    let tabs: Array<Module> = [];
     const module = props.sandbox.modules.find(
       m => m.id === props.currentModule.id
     );
@@ -93,15 +106,8 @@ export default class Content extends React.PureComponent<Props, State> {
       tabs = [module];
     }
 
-    this.state = {
-      running: !props.runOnClick,
-      tabs,
-      dragging: false,
-      isInProjectView: props.isInProjectView,
-    };
-
-    this.errors = [];
-  }
+    return tabs;
+  };
 
   renderTabStatus = (hovering, closeTab) => {
     const { isNotSynced, tabCount } = this.props;
@@ -146,6 +152,12 @@ export default class Content extends React.PureComponent<Props, State> {
       if (this.editor && this.editor.changeModule) {
         this.editor.changeModule(nextProps.currentModule);
       }
+    }
+
+    if (this.props.sandbox.id !== nextProps.sandbox.id) {
+      this.setState({
+        tabs: this.getInitTabs(nextProps),
+      });
     }
   }
 

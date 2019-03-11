@@ -1,14 +1,13 @@
 // @ts-check
 /* eslint-disable react/prefer-stateless-function */
 import React from 'react';
-import history from 'app/utils/history';
-import { sandboxUrl, profileUrl } from 'common/utils/url-generator';
+import { sandboxUrl, profileUrl } from 'common/lib/utils/url-generator';
 
 import { observer } from 'mobx-react';
 import EyeIcon from 'react-icons/lib/fa/eye';
 import GithubIcon from 'react-icons/lib/fa/github';
 
-import getTemplate from 'common/templates';
+import getTemplate from 'common/lib/templates';
 
 import {
   Container,
@@ -64,16 +63,9 @@ class SandboxItem extends React.Component<Props> {
     }
   }
 
-  openSandbox = (openNewWindow = false) => {
-    // Git sandboxes aren't shown here anyway
+  openSandbox = () => {
     const url = sandboxUrl({ id: this.props.id });
-    if (openNewWindow === true) {
-      window.open(url, '_blank');
-    } else {
-      history.push(url);
-    }
-
-    return true;
+    window.open(url, '_blank');
   };
 
   openUser = username => {

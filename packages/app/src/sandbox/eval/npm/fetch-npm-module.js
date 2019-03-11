@@ -1,11 +1,10 @@
 // @flow
-import * as pathUtils from 'common/utils/path';
+import * as pathUtils from 'common/lib/utils/path';
 import resolve from 'browser-resolve';
 import DependencyNotFoundError from 'sandbox-hooks/errors/dependency-not-found-error';
 
 import type { Module } from '../entities/module';
 import Manager from '../manager';
-import type { Manifest } from '../manager';
 
 import getDependencyName from '../utils/get-dependency-name';
 import { packageFilter } from '../utils/resolve-utils';
@@ -71,17 +70,19 @@ function normalizeJSDelivr(
 }
 
 const TEMP_USE_JSDELIVR = false;
+// Strips the version of a path, eg. test/1.3.0 -> test
+const ALIAS_REGEX = /\/\d*\.\d*\.\d*.*?(\/|$)/;
 
-function getUnpkgUrl(name: string, version: string) {
-  const nameWithoutAlias = name.replace(/\/\d*\.\d*\.\d*$/, '');
+function getUnpkgUrl(name: string, version: string, forceJsDelivr?: boolean) {
+  const nameWithoutAlias = name.replace(ALIAS_REGEX, '');
 
-  return TEMP_USE_JSDELIVR
-    ? `https://cdn.jsdelivr.net/npm/${nameWithoutAlias}@${version}`
-    : `https://unpkg.com/${nameWithoutAlias}@${version}`;
+  return TEMP_USE_JSDELIVR || forceJsDelivr
+    ? `https://unpkg.com/${nameWithoutAlias}@${version}`
+    : `https://cdn.jsdelivr.net/npm/${nameWithoutAlias}@${version}`;
 }
 
 function getMeta(name: string, packageJSONPath: string, version: string) {
-  const nameWithoutAlias = name.replace(/\/\d*\.\d*\.\d*$/, '');
+  const nameWithoutAlias = name.replace(ALIAS_REGEX, '');
   const id = `${packageJSONPath}@${version}`;
   if (metas[id]) {
     return metas[id];
@@ -126,6 +127,22 @@ function downloadDependency(depName: string, depVersion: string, path: string) {
 
       throw new Error(`Could not find module ${path}`);
     })
+    .catch(err => {
+      if (!isGitHub) {
+        // Fallback to jsdelivr
+        return fetch(
+          `${getUnpkgUrl(depName, depVersion, true)}${relativePath}`
+        ).then(x2 => {
+          if (x2.ok) {
+            return x2.text();
+          }
+
+          throw new Error(`Could not find module ${path}`);
+        });
+      }
+
+      throw err;
+    })
     .then(x => ({
       path,
       code: x,
@@ -169,7 +186,7 @@ function resolvePath(
             currentTModule.dependencies.add(tModule);
             return callback(null, tModule.module.code);
           } catch (e) {
-            const depPath = p.replace('/node_modules/', '');
+            const depPath = p.replace(/.*\/node_modules\//, '');
             const depName = getDependencyName(depPath);
 
             // To prevent infinite loops we keep track of which dependencies have been requested before.
@@ -182,7 +199,7 @@ function resolvePath(
 
             // eslint-disable-next-line
             const subDepVersionVersionInfo = await findDependencyVersion(
-              currentPath,
+              currentTModule,
               manager,
               defaultExtensions,
               depName
@@ -246,10 +263,10 @@ async function findDependencyVersion(
     const packageJSON =
       manager.transpiledModules[foundPackageJSONPath] &&
       manager.transpiledModules[foundPackageJSONPath].module.code;
-    const { version } = JSON.parse(packageJSON);
+    const { version, name } = JSON.parse(packageJSON);
 
     if (packageJSON !== '//empty.js') {
-      return { packageJSONPath: foundPackageJSONPath, version };
+      return { packageJSONPath: foundPackageJSONPath, version, name };
     }
   } catch (e) {
     /* do nothing */

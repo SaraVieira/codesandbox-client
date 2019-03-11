@@ -5,8 +5,8 @@ import { TweenMax, Elastic } from 'gsap';
 import store from 'store/dist/store.modern';
 import MinimizeIcon from 'react-icons/lib/fa/angle-up';
 
-import Tooltip from 'common/components/Tooltip';
-import type { Template } from 'common/templates';
+import Tooltip from 'common/lib/components/Tooltip';
+import type { Template } from 'common/lib/templates';
 
 import Unread from './Unread';
 import console from './Console';
@@ -361,7 +361,7 @@ export default class DevTools extends React.PureComponent<Props, State> {
 
     return (
       <Container
-        innerRef={el => {
+        ref={el => {
           this.node = el;
         }}
         style={{
@@ -414,6 +414,7 @@ export default class DevTools extends React.PureComponent<Props, State> {
             <MinimizeIcon
               onMouseDown={hidden ? undefined : this.handleMinimizeClick}
               style={{
+                marginTop: hidden ? 0 : 4,
                 transform: hidden ? `rotateZ(0deg)` : `rotateZ(180deg)`,
               }}
             />

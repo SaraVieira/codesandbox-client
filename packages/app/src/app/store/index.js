@@ -62,6 +62,7 @@ export default Module({
       y: 0,
     },
     currentModal: undefined,
+    currentModalMessage: undefined,
     uploadedFiles: null,
     maxStorage: 0,
     usedStorage: 0,
@@ -78,7 +79,6 @@ export default Module({
   signals: {
     appUnmounted: sequences.unloadApp,
     searchMounted: sequences.loadSearch,
-    termsMounted: sequences.loadTerms,
     sandboxPageMounted: sequences.loadSandboxPage,
     cliMounted: sequences.loadCLI,
     cliInstructionsMounted: sequences.loadCLIInstructions,
@@ -100,6 +100,7 @@ export default Module({
     signOutClicked: sequences.signOut,
     signOutGithubIntegration: sequences.signOutGithubIntegration,
     setUpdateStatus: sequences.setUpdateStatus,
+    refetchSandboxInfo: sequences.refetchSandboxInfo,
   },
   catch: [[errors.AuthenticationError, sequences.showAuthenticationError]],
   modules: {

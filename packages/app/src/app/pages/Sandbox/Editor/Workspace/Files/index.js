@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { inject, observer } from 'mobx-react';
-import { getModulePath } from 'common/sandbox/modules';
+import { getModulePath } from 'common/lib/sandbox/modules';
 
 import DirectoryEntry from './DirectoryEntry/index';
 import WorkspaceItem from '../WorkspaceItem';
@@ -10,17 +10,17 @@ import EditIcons from './DirectoryEntry/Entry/EditIcons';
 class Files extends React.Component {
   createModule = () => {
     // INCREDIBLY BAD PRACTICE! TODO: FIX THIS
-    this.directory.onCreateModuleClick();
+    this._createModule();
   };
 
   createDirectory = () => {
     // INCREDIBLY BAD PRACTICE! TODO: FIX THIS
-    this.directory.onCreateDirectoryClick();
+    this._createDirectory();
   };
 
   uploadFile = () => {
     // INCREDIBLY BAD PRACTICE! TODO: FIX THIS
-    this.directory.onUploadFileClick();
+    this._uploadFile();
   };
 
   getModulePath = (moduleId: string) => {
@@ -57,11 +57,17 @@ class Files extends React.Component {
       >
         <DirectoryEntry
           root
-          innerRef={el => {
-            this.directory = el;
-          }}
           getModulePath={this.getModulePath}
           title={sandbox.title || 'Project'}
+          initializeProperties={({
+            onCreateModuleClick,
+            onCreateDirectoryClick,
+            onUploadFileClick,
+          }) => {
+            this._createModule = onCreateModuleClick;
+            this._createDirectory = onCreateDirectoryClick;
+            this._uploadFile = onUploadFileClick;
+          }}
           depth={-1}
           id={null}
           shortid={null}

@@ -3,7 +3,9 @@ import { inject, observer } from 'mobx-react';
 import Downshift from 'downshift';
 import genie from 'geniejs';
 
-import Input from 'common/components/Input';
+import { ESC } from 'common/lib/utils/keycodes';
+
+import Input from 'common/lib/components/Input';
 import Keys from './Keys';
 
 import {
@@ -57,7 +59,7 @@ class QuickActions extends React.Component {
   getItems = value => genie.getMatchingWishes(value);
 
   handleKeyUp = e => {
-    if (e.keyCode === 27) {
+    if (e.keyCode === ESC) {
       this.closeQuickActions();
     }
   };

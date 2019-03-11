@@ -1,6 +1,6 @@
 import styled, { css } from 'styled-components';
 import Link from 'react-router-dom/Link';
-import theme from 'common/theme';
+import theme from 'common/lib/theme';
 
 const getBackgroundColor = ({
   theme: internalTheme,
@@ -90,6 +90,20 @@ const styles = css`
   user-select: none;
   text-decoration: none;
   font-weight: 600;
+
+  ${props =>
+    props.small
+      ? css`
+          padding: 0.5em 0.7em;
+          font-size: 0.875em;
+        `
+      : css`
+          padding: 0.65em 2.25em;
+        `};
+
+  svg {
+    font-size: 1.125em;
+  }
 
   ${props =>
     !props.disabled &&

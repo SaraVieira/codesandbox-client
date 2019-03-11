@@ -4,7 +4,6 @@ import { Manager, generatePackageJSON } from 'smooshpack';
 import { listen } from 'codesandbox-api';
 
 import {
-  IFile,
   IFiles,
   IManagerState,
   ISandpackContext,
@@ -155,6 +154,7 @@ export default class SandpackProvider extends React.PureComponent<
             this.props.entry
           ),
           template: this.props.template,
+          showOpenInCodeSandbox: this.props.showOpenInCodeSandbox,
         },
         this.getOptions()
       );
@@ -273,6 +273,7 @@ export default class SandpackProvider extends React.PureComponent<
               position: 'absolute',
               visibility: 'hidden',
             }}
+            sandbox="allow-forms allow-scripts allow-same-origin allow-modals allow-popups allow-presentation"
             src={this.props.bundlerURL}
           />
           {children}

@@ -1,5 +1,5 @@
 import { actions, dispatch } from 'codesandbox-api';
-import _debug from 'app/utils/debug';
+import _debug from 'common/lib/utils/debug';
 
 import dependenciesToQuery from './dependencies-to-query';
 
@@ -18,11 +18,11 @@ const host = process.env.CODESANDBOX_HOST;
 const VERSION = 1;
 
 const BUCKET_URL =
-  process.env.NODE_ENV === 'production'
+  process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'test'
     ? 'https://d1jyvh0kxilfa7.cloudfront.net'
     : 'https://s3-eu-west-1.amazonaws.com/dev.packager.packages';
 const PACKAGER_URL =
-  process.env.NODE_ENV === 'production'
+  process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'test'
     ? 'https://drq28qbjmc.execute-api.eu-west-1.amazonaws.com/prod/packages'
     : 'https://8o2xeuyo66.execute-api.eu-west-1.amazonaws.com/dev/packages';
 
@@ -90,6 +90,19 @@ function dependenciesToBucketPath(dependencies: Object) {
     .join('%2B')}.json`;
 }
 
+/**
+ * Some dependencies have a space in their version for some reason, this is invalid and we
+ * ignore them. This is what yarn does as well.
+ */
+function removeSpacesFromDependencies(dependencies: Object) {
+  const newDeps = {};
+  Object.keys(dependencies).forEach(depName => {
+    const [version] = dependencies[depName].split(' ');
+    newDeps[depName] = version;
+  });
+  return newDeps;
+}
+
 async function getAbsoluteDependencies(dependencies: Object) {
   const nonAbsoluteDependencies = Object.keys(dependencies).filter(dep => {
     const version = dependencies[dep];
@@ -124,7 +137,9 @@ async function getAbsoluteDependencies(dependencies: Object) {
 }
 
 async function getDependencies(dependencies: Object) {
-  const absoluteDependencies = await getAbsoluteDependencies(dependencies);
+  const absoluteDependencies = await getAbsoluteDependencies(
+    removeSpacesFromDependencies(dependencies)
+  );
   const dependencyUrl = dependenciesToQuery(absoluteDependencies);
   const bucketDependencyUrl = dependenciesToBucketPath(absoluteDependencies);
 

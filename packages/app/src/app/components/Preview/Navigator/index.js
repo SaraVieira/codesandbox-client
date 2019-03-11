@@ -4,8 +4,8 @@ import LeftIcon from 'react-icons/lib/fa/angle-left';
 import RightIcon from 'react-icons/lib/fa/angle-right';
 import RefreshIcon from 'react-icons/lib/md/refresh';
 
-import Switch from 'common/components/Switch';
-import Tooltip from 'common/components/Tooltip';
+import Switch from 'common/lib/components/Switch';
+import Tooltip from 'common/lib/components/Tooltip';
 
 import HorizontalAlign from './HorizontalAlign';
 import VerticalAlign from './VerticalAlign';
@@ -38,13 +38,13 @@ function Navigator({
   return (
     <Container className="flying-container-handler" style={{ cursor: 'move' }}>
       <Icons>
-        <Icon disabled={!onBack} onClick={onBack}>
+        <Icon aria-label="Go Back" disabled={!onBack} onClick={onBack}>
           <LeftIcon />
         </Icon>
-        <Icon disabled={!onForward} onClick={onForward}>
+        <Icon aria-label="Go Forward" disabled={!onForward} onClick={onForward}>
           <RightIcon />
         </Icon>
-        <Icon onClick={onRefresh}>
+        <Icon aria-label="Refresh" onClick={onRefresh}>
           <RefreshIcon />
         </Icon>
       </Icons>

@@ -4,17 +4,17 @@ import { inject, observer } from 'mobx-react';
 import { sortBy } from 'lodash-es';
 
 import RecordIcon from 'react-icons/lib/md/fiber-manual-record';
-import Input from 'common/components/Input';
-import Margin from 'common/components/spacing/Margin';
-import delay from 'common/utils/animation/delay-effect';
-import Switch from 'common/components/Switch';
+import Input from 'common/lib/components/Input';
+import Margin from 'common/lib/components/spacing/Margin';
+import delay from 'common/lib/utils/animation/delay-effect';
+import Switch from 'common/lib/components/Switch';
 
-import Tooltip from 'common/components/Tooltip';
+import Tooltip from 'common/lib/components/Tooltip';
 
 import AddIcon from 'react-icons/lib/md/add';
 import RemoveIcon from 'react-icons/lib/md/remove';
-import FollowIcon from 'react-icons/lib/ti/user-add';
-import UnFollowIcon from 'react-icons/lib/ti/user-delete';
+import FollowIcon from 'react-icons/lib/io/eye';
+import UnFollowIcon from 'react-icons/lib/io/eye-disabled';
 
 import User from './User';
 import Countdown from './Countdown';
@@ -307,13 +307,15 @@ class LiveInfo extends React.Component {
                         {followingUserId === owner.id ? (
                           <Tooltip title="Stop following">
                             <UnFollowIcon
-                              onClick={() => setFollowing({ userId: null })}
+                              onClick={() => setFollowing({ liveUserId: null })}
                             />
                           </Tooltip>
                         ) : (
                           <Tooltip title="Follow along">
                             <FollowIcon
-                              onClick={() => setFollowing({ userId: owner.id })}
+                              onClick={() =>
+                                setFollowing({ liveUserId: owner.id })
+                              }
                             />
                           </Tooltip>
                         )}
@@ -345,14 +347,16 @@ class LiveInfo extends React.Component {
                             {followingUserId === user.id ? (
                               <Tooltip title="Stop following">
                                 <UnFollowIcon
-                                  onClick={() => setFollowing({ userId: null })}
+                                  onClick={() =>
+                                    setFollowing({ liveUserId: null })
+                                  }
                                 />
                               </Tooltip>
                             ) : (
                               <Tooltip title="Follow along">
                                 <FollowIcon
                                   onClick={() =>
-                                    setFollowing({ userId: user.id })
+                                    setFollowing({ liveUserId: user.id })
                                   }
                                 />
                               </Tooltip>
@@ -365,7 +369,7 @@ class LiveInfo extends React.Component {
                               <Tooltip title={'Make spectator'}>
                                 <RemoveIcon
                                   onClick={() =>
-                                    removeEditor({ userId: user.id })
+                                    removeEditor({ liveUserId: user.id })
                                   }
                                 />
                               </Tooltip>
@@ -399,14 +403,16 @@ class LiveInfo extends React.Component {
                             {followingUserId === user.id ? (
                               <Tooltip title="Stop following">
                                 <UnFollowIcon
-                                  onClick={() => setFollowing({ userId: null })}
+                                  onClick={() =>
+                                    setFollowing({ liveUserId: null })
+                                  }
                                 />
                               </Tooltip>
                             ) : (
                               <Tooltip title="Follow along">
                                 <FollowIcon
                                   onClick={() =>
-                                    setFollowing({ userId: user.id })
+                                    setFollowing({ liveUserId: user.id })
                                   }
                                 />
                               </Tooltip>
@@ -418,7 +424,9 @@ class LiveInfo extends React.Component {
                           <IconContainer style={{ marginLeft: '0.25rem' }}>
                             <Tooltip title={'Make editor'}>
                               <AddIcon
-                                onClick={() => addEditor({ userId: user.id })}
+                                onClick={() =>
+                                  addEditor({ liveUserId: user.id })
+                                }
                               />
                             </Tooltip>
                           </IconContainer>

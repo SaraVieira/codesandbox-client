@@ -2,7 +2,7 @@ import React from 'react';
 import { inject, observer } from 'mobx-react';
 
 import { canPrettify } from 'app/utils/prettify';
-import Tooltip from 'common/components/Tooltip';
+import Tooltip from 'common/lib/components/Tooltip';
 import TestsIcon from 'react-icons/lib/md/subtitles';
 
 import TabContainer from './TabContainer';
@@ -113,7 +113,7 @@ class EditorTabs extends React.Component {
     return (
       <Container>
         <TabsContainer
-          innerRef={el => {
+          ref={el => {
             this.container = el;
           }}
         >
@@ -171,7 +171,7 @@ class EditorTabs extends React.Component {
                         tab.module.shortid
                       )
                     )}
-                    innerRef={el => {
+                    ref={el => {
                       this.tabEls[id] = el;
                     }}
                   />
@@ -189,7 +189,7 @@ class EditorTabs extends React.Component {
                     tabCount={store.editor.tabs.length}
                     position={i}
                     dirty={tab.dirty}
-                    innerRef={el => {
+                    ref={el => {
                       this.tabEls[tab.id] = el;
                     }}
                     title={`Diff: ${tab.titleA} - ${tab.titleB}`}

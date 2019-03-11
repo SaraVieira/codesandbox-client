@@ -99,6 +99,16 @@ export const Sandbox = types.model({
   version: types.number,
   viewCount: types.number,
   team: types.maybeNull(Team),
+  roomId: types.maybeNull(types.string),
+  collection: types.maybeNull(
+    types.union(
+      types.boolean,
+      types.model({
+        path: types.string,
+        id: types.string,
+      })
+    )
+  ),
 });
 
 export default {

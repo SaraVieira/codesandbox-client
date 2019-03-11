@@ -5,7 +5,7 @@ import { actions, dispatch, listen } from 'codesandbox-api';
 import SplitPane from 'react-split-pane';
 
 import immer from 'immer';
-import getTemplate, { type Template } from 'common/templates';
+import getTemplate, { type Template } from 'common/lib/templates';
 
 import { Container, TestDetails, TestContainer } from './elements';
 
@@ -136,7 +136,11 @@ class Tests extends React.Component<Props, State> {
   };
 
   handleMessage = (data: Object) => {
-    if (data.type === 'done' && (!this.props.hidden || this.props.standalone)) {
+    if (
+      data.type === 'done' &&
+      this.state.watching &&
+      (!this.props.hidden || this.props.standalone)
+    ) {
       this.runAllTests();
     } else if (data.type === 'test') {
       switch (data.event) {

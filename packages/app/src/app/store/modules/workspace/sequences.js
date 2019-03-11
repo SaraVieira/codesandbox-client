@@ -1,6 +1,6 @@
 import { set, when, push } from 'cerebral/operators';
 import { state, props } from 'cerebral/tags';
-import getTemplate from 'common/templates';
+import getTemplate from 'common/lib/templates';
 import * as actions from './actions';
 import { ensureOwnedEditable, closeModal, openModal } from '../../sequences';
 import { updateSandboxPackage } from './../editor/sequences';
@@ -48,16 +48,28 @@ export const changeValue = [
 
 export const updateSandboxInfo = [
   ensureOwnedEditable,
-  set(
+  when(
     state`editor.sandboxes.${state`editor.currentId`}.title`,
-    state`workspace.project.title`
-  ),
-  set(
+    state`workspace.project.title`,
     state`editor.sandboxes.${state`editor.currentId`}.description`,
-    state`workspace.project.description`
+    state`workspace.project.description`,
+    (t1, t2, d1, d2) => (t2 && t1 !== t2) || (d2 && d1 !== d2)
   ),
-  actions.updateSandbox,
-  updateSandboxPackage,
+  {
+    true: [
+      set(
+        state`editor.sandboxes.${state`editor.currentId`}.title`,
+        state`workspace.project.title`
+      ),
+      set(
+        state`editor.sandboxes.${state`editor.currentId`}.description`,
+        state`workspace.project.description`
+      ),
+      actions.updateSandbox,
+      updateSandboxPackage,
+    ],
+    false: [],
+  },
 ];
 
 export const addExternalResource = [

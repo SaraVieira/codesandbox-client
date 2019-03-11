@@ -2,7 +2,7 @@
 /* eslint-disable react/prefer-stateless-function */
 import React from 'react';
 import history from 'app/utils/history';
-import { sandboxUrl } from 'common/utils/url-generator';
+import { sandboxUrl } from 'common/lib/utils/url-generator';
 import { DragSource } from 'react-dnd';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 import { Mutation } from 'react-apollo';
@@ -11,11 +11,12 @@ import TrashIcon from 'react-icons/lib/md/delete';
 import Unlisted from 'react-icons/lib/md/insert-link';
 import Private from 'react-icons/lib/md/lock';
 
-import Input from 'common/components/Input';
-import getTemplate from 'common/templates';
-import theme from 'common/theme';
-import track from 'common/utils/analytics';
+import Input from 'common/lib/components/Input';
+import getTemplate from 'common/lib/templates';
+import theme from 'common/lib/theme';
+import track from 'common/lib/utils/analytics';
 
+import { ESC, ENTER } from 'common/lib/utils/keycodes';
 import { RENAME_SANDBOX_MUTATION } from '../../queries';
 
 import {
@@ -158,31 +159,35 @@ class SandboxItem extends React.PureComponent<Props> {
     }
 
     if (selectedCount > 1) {
+      const items = [];
+
+      if (this.props.isPatron) {
+        items.push([
+          {
+            title: `Make ${selectedCount} Sandboxes Public`,
+            action: () => {
+              this.props.setSandboxesPrivacy(0);
+              return true;
+            },
+          },
+          {
+            title: `Make ${selectedCount} Sandboxes Unlisted`,
+            action: () => {
+              this.props.setSandboxesPrivacy(1);
+              return true;
+            },
+          },
+          {
+            title: `Make ${selectedCount} Sandboxes Private`,
+            action: () => {
+              this.props.setSandboxesPrivacy(2);
+              return true;
+            },
+          },
+        ]);
+      }
       return [
-        this.props.isPatron &&
-          [
-            {
-              title: `Make ${selectedCount} Sandboxes Public`,
-              action: () => {
-                this.props.setSandboxesPrivacy(0);
-                return true;
-              },
-            },
-            {
-              title: `Make ${selectedCount} Sandboxes Unlisted`,
-              action: () => {
-                this.props.setSandboxesPrivacy(1);
-                return true;
-              },
-            },
-            {
-              title: `Make ${selectedCount} Sandboxes Private`,
-              action: () => {
-                this.props.setSandboxesPrivacy(2);
-                return true;
-              },
-            },
-          ].filter(Boolean),
+        ...items,
         [
           {
             title: `Move ${selectedCount} Sandboxes To Trash`,
@@ -300,7 +305,7 @@ class SandboxItem extends React.PureComponent<Props> {
   };
 
   handleKeyDown = (e: KeyboardEvent) => {
-    if (e.keyCode === 13) {
+    if (e.keyCode === ENTER) {
       track('Dashboard - Sandbox Opened With Enter');
       // enter
       this.openSandbox();
@@ -415,7 +420,7 @@ class SandboxItem extends React.PureComponent<Props> {
                 onBlur={this.handleOnBlur}
                 onFocus={this.handleOnFocus}
                 onKeyDown={this.handleKeyDown}
-                innerRef={el => {
+                ref={el => {
                   this.el = el;
                 }}
                 role="button"
@@ -474,21 +479,19 @@ class SandboxItem extends React.PureComponent<Props> {
 
                             return (
                               <Input
-                                innerRef={node => {
+                                ref={node => {
                                   input = node;
                                   if (node) {
                                     node.select();
                                   }
                                 }}
                                 onKeyDown={e => {
-                                  if (e.keyCode === 13) {
-                                    // Enter
+                                  if (e.keyCode === ENTER) {
                                     e.preventDefault();
                                     e.stopPropagation();
 
                                     saveName();
-                                  } else if (e.keyCode === 27) {
-                                    // Escape
+                                  } else if (e.keyCode === ESC) {
                                     e.preventDefault();
                                     e.stopPropagation();
 

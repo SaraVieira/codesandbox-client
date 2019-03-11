@@ -1,25 +1,12 @@
-const { createFilePath } = require('gatsby-source-filesystem');
-const { resolve, dirname } = require('path');
+const { resolve } = require('path');
+const env = require('common/lib/config/env');
 
 // Parse date information out of post filename.
-const BLOG_POST_FILENAME_REGEX = /([0-9]+)\-([0-9]+)\-([0-9]+)\-(.+)\.md$/;
+
 const DOCUMENTATION_FILENAME_REGEX = /[0-9]+-(.*)\.md$/;
 
-function dateToLocalJSON(date) {
-  function addZ(n) {
-    return (n < 10 ? '0' : '') + n;
-  }
-  return (
-    date.getFullYear() +
-    '-' +
-    addZ(date.getMonth() + 1) +
-    '-' +
-    addZ(date.getDate())
-  );
-}
-
-exports.onCreateNode = ({ node, boundActionCreators, getNode }) => {
-  const { createNodeField } = boundActionCreators;
+exports.onCreateNode = ({ node, actions, getNode }) => {
+  const { createNodeField } = actions;
 
   if (node.internal.type === `MarkdownRemark`) {
     const { url } = node.frontmatter;
@@ -31,28 +18,7 @@ exports.onCreateNode = ({ node, boundActionCreators, getNode }) => {
       value: relativePath,
     });
 
-    if (relativePath.includes('changelog')) {
-      // The date portion comes from the file name: <date>-<title>.md
-      const match = BLOG_POST_FILENAME_REGEX.exec(relativePath);
-      const year = match[1];
-      const month = match[2];
-      const day = match[3];
-      const slug = match[4];
-
-      const date = new Date(year, month - 1, day, 0, 0);
-
-      // Blog posts are sorted by date and display the date in their header.
-      createNodeField({
-        node,
-        name: 'date',
-        value: dateToLocalJSON(date),
-      });
-      createNodeField({
-        node,
-        name: `slug`,
-        value: slug,
-      });
-    } else {
+    if (relativePath.includes('docs')) {
       const match = DOCUMENTATION_FILENAME_REGEX.exec(relativePath);
 
       createNodeField({
@@ -71,8 +37,8 @@ exports.onCreateNode = ({ node, boundActionCreators, getNode }) => {
   }
 };
 
-exports.createPages = async ({ graphql, boundActionCreators }) => {
-  const { createPage, createRedirect } = boundActionCreators;
+exports.createPages = async ({ graphql, actions }) => {
+  const { createPage, createRedirect } = actions;
 
   const docsTemplate = resolve(__dirname, './src/templates/docs.js');
 
@@ -86,7 +52,10 @@ exports.createPages = async ({ graphql, boundActionCreators }) => {
   const allMarkdown = await graphql(
     `
       {
-        allMarkdownRemark(limit: 1000) {
+        allMarkdownRemark(
+          filter: { fileAbsolutePath: { regex: "/docs/" } }
+          limit: 1000
+        ) {
           edges {
             node {
               fields {
@@ -131,37 +100,61 @@ exports.createPages = async ({ graphql, boundActionCreators }) => {
   });
 };
 
-exports.modifyWebpackConfig = ({ config, stage }) => {
-  config.merge({
-    resolve: {
-      root: resolve(__dirname, './src'),
-      extensions: ['', '.js', '.jsx', '.json'],
-    },
-  });
-
-  config._config.resolve.alias = {
-    react: dirname(require.resolve('react')),
-    'react-dom': dirname(require.resolve('react-dom')),
-  };
-
-  const timestamp = Date.now();
-  switch (stage) {
-    case 'build-javascript':
-      config.merge({
-        output: {
-          filename: `[name]-${timestamp}-[chunkhash].js`,
-          chunkFilename: `[name]-${timestamp}-[chunkhash].js`,
-        },
-      });
-
-      break;
-    case 'build-css': {
-      config._config.plugins[1].filename = 'codesandbox-homepage-styles.css';
-      break;
-    }
-    default:
-      break;
+exports.onCreateWebpackConfig = ({
+  stage,
+  getConfig,
+  loaders,
+  actions,
+  plugins,
+}) => {
+  if (stage === 'build-html') {
+    actions.setWebpackConfig({
+      module: {
+        rules: [
+          {
+            test: /gsap/,
+            use: loaders.null(),
+          },
+        ],
+      },
+    });
   }
 
-  return config;
+  actions.setWebpackConfig({
+    plugins: [plugins.define(env.default)],
+  });
+
+  const config = getConfig();
+
+  config.module.rules = [
+    // Omit the default rule where test === '\.jsx?$'
+    ...config.module.rules.filter(
+      rule => String(rule.test) !== String(/\.jsx?$/)
+    ),
+
+    // Recreate it with custom exclude filter
+    {
+      // Called without any arguments, `loaders.js` will return an
+      // object like:
+      // {
+      //   options: undefined,
+      //   loader: '/path/to/node_modules/gatsby/dist/utils/babel-loader.js',
+      // }
+      // Unless you're replacing Babel with a different transpiler, you probably
+      // want this so that Gatsby will apply its required Babel
+      // presets/plugins.  This will also merge in your configuration from
+      // `babel.config.js`.
+      ...loaders.js(),
+
+      test: /\.jsx?$/,
+
+      // Exclude all node_modules from transpilation, except for 'common' and 'app'
+      exclude: modulePath =>
+        /node_modules/.test(modulePath) &&
+        !/node_modules\/(common|app)/.test(modulePath),
+    },
+  ];
+
+  // This will completely replace the webpack config with the modified object.
+  actions.replaceWebpackConfig(config);
 };

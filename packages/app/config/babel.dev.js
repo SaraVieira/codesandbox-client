@@ -11,7 +11,7 @@ module.exports = {
       require.resolve('@babel/preset-env'),
       {
         targets: {
-          chrome: 67,
+          ie: 11,
           // We currently minify with uglify
           // Remove after https://github.com/mishoo/UglifyJS2/issues/448
         },
@@ -23,6 +23,8 @@ module.exports = {
     ],
     // JSX, Flow
     require.resolve('@babel/preset-react'),
+
+    require.resolve('@babel/preset-typescript'),
   ].filter(Boolean),
   plugins: [
     require.resolve('@babel/plugin-transform-template-literals'),

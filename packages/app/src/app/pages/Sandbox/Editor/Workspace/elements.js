@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import fadeIn from 'common/utils/animation/fade-in';
+import fadeIn from 'common/lib/utils/animation/fade-in';
 
 export const getContainerStyles = props => {
   const { theme } = props;
@@ -196,6 +196,10 @@ export const Description = styled.div`
   font-size: 0.875rem;
   color: ${props =>
     props.theme.light ? 'rgba(0, 0, 0, 0.8)' : 'rgba(255, 255, 255, 0.8)'};
+`;
+
+export const ErrorDescription = styled(Description)`
+  color: ${props => props.theme.red};
 `;
 
 export const VersionContainer = styled.div`

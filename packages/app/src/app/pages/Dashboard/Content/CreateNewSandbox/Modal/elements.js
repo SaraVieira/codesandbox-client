@@ -1,6 +1,6 @@
 import styled, { css } from 'styled-components';
-import delayEffect from 'common/utils/animation/delay-effect';
-import delayOutEffect from 'common/utils/animation/delay-out-effect';
+import delayEffect from 'common/lib/utils/animation/delay-effect';
+import delayOutEffect from 'common/lib/utils/animation/delay-out-effect';
 
 export const Container = styled.main`
   transition: 0.3s ease all;
@@ -69,7 +69,7 @@ export const Templates = styled.div`
   }
 `;
 
-export const ImportChoices = Templates.extend`
+export const ImportChoices = styled(Templates)`
   justify-content: space-between;
 `;
 

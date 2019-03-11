@@ -1,4 +1,4 @@
-import { isBabel7 } from 'common/utils/is-babel-7';
+import { isBabel7 } from 'common/lib/utils/is-babel-7';
 
 import Preset from '../';
 
@@ -25,18 +25,33 @@ export default function initialize() {
             configurations &&
               configurations.package &&
               configurations.package.parsed &&
-              configurations.package.parsed.dependencies
+              configurations.package.parsed.dependencies,
+
+            configurations &&
+              configurations.package &&
+              configurations.package.parsed &&
+              configurations.package.parsed.devDependencies
           ) &&
           !v2Initialized
         ) {
           const babelOptions = {
             isV7: true,
+            compileNodeModulesWithEnv: true,
             config: {
               plugins: [
+                'transform-flow-strip-types',
+                'transform-destructuring',
                 'babel-plugin-macros',
-                'proposal-class-properties',
-                'proposal-object-rest-spread',
-                'transform-runtime',
+                ['proposal-class-properties', { loose: true }],
+                ['proposal-object-rest-spread', { useBuiltIns: true }],
+                [
+                  'transform-runtime',
+                  {
+                    corejs: false,
+                    helpers: true,
+                    regenerator: true,
+                  },
+                ],
                 'syntax-dynamic-import',
               ],
               presets: [
@@ -64,7 +79,8 @@ export default function initialize() {
             },
           };
           preset.registerTranspiler(
-            module => /\.(t|j)sx?$/.test(module.path),
+            module =>
+              /\.(t|j)sx?$/.test(module.path) && !module.path.endsWith('.d.ts'),
             [
               {
                 transpiler: babelTranspiler,

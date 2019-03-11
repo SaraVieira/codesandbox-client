@@ -1,10 +1,10 @@
 import { clone } from 'mobx-state-tree';
-import { getModulePath } from 'common/sandbox/modules';
-import getDefinition from 'common/templates';
+import { getModulePath } from 'common/lib/sandbox/modules';
+import getDefinition from 'common/lib/templates';
 import { chunk } from 'lodash-es';
 import { MAX_FILE_SIZE } from 'codesandbox-import-utils/lib/is-text';
 import denormalize from 'codesandbox-import-utils/lib/create-sandbox/denormalize';
-import track from 'common/utils/analytics';
+import track from 'common/lib/utils/analytics';
 
 import {
   resolveModuleWrapped,
@@ -136,6 +136,7 @@ export async function uploadFiles({ api, props, path }) {
               /\.(le|sc|sa)ss$/.test(filePath) ||
               /\.haml$/.test(filePath) ||
               /\.pug$/.test(filePath) ||
+              /\.svg$/.test(filePath) ||
               file.type.startsWith('text/') ||
               file.type === 'application/json') &&
             dataURI.length < MAX_FILE_SIZE

@@ -2,7 +2,7 @@
 /* eslint-disable import/no-webpack-loader-syntax, prefer-template, no-use-before-define, no-shadow, operator-assignment, no-else-return */
 import querystring from 'querystring';
 
-import { basename, dirname } from 'common/utils/path';
+import { basename, dirname } from 'common/lib/utils/path';
 
 import componentNormalizerRaw from '!raw-loader!./component-normalizer';
 import vueHotReloadAPIRaw from '!raw-loader!vue-hot-reload-api';
@@ -122,6 +122,7 @@ export default function(content: string, loaderContext: LoaderContext) {
     ts: ['ts-loader'],
     typescript: ['ts-loader'],
     pug: ['pug-loader'],
+    coffee: ['babel-loader', 'coffee-loader'],
   };
 
   const loaders = Object.assign({}, defaultLoaders, codeSandboxLoaders);

@@ -4,7 +4,7 @@ import SearchIcon from 'react-icons/lib/go/search';
 import { Highlight } from 'react-instantsearch/dom';
 import compareVersions from 'compare-versions';
 
-import Tooltip from 'common/components/Tooltip';
+import Tooltip from 'common/lib/components/Tooltip';
 
 import GitHubLogo from 'app/components/GitHubLogo';
 import formatDownloads from '../formatDownloads';
@@ -31,7 +31,7 @@ const getDefaultSelectedVersion = tags => {
     return '';
   }
 
-  return tags.latest + ' - latest';
+  return tags.latest;
 };
 
 export default class DependencyHit extends React.PureComponent {
@@ -141,7 +141,7 @@ export default class DependencyHit extends React.PureComponent {
               {versions.map(v => {
                 const tagName = getTagName(hit.tags, v);
                 return (
-                  <option key={v}>
+                  <option value={v} key={v}>
                     {v} {tagName && `- ${tagName}`}
                   </option>
                 );

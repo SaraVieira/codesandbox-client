@@ -1,6 +1,6 @@
 // @flow
 import React from 'react';
-import Input from 'common/components/Input';
+import Input from 'common/lib/components/Input';
 import Button from 'app/components/Button';
 import { Container, Title, SubTitle, Image, MaxWidth } from './elements';
 
@@ -40,7 +40,7 @@ export default class ImageViewer extends React.Component<Props>
 
         <MaxWidth onSubmit={this.onSubmit}>
           <Input
-            innerRef={el => {
+            ref={el => {
               this.input = el;
             }}
             onChange={this.doChangeCode}
